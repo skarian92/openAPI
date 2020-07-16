@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<style>
+    .main-container{padding: 40px 0 20px 0;}
+</style>
+<body>
+<div class="container main-container">
+    <h2>Open APIS</h2>
+
+    <div class="form-group">
+        <label class="form-check-label" for="phn">Phone number</label><br>
+        <input class="form-control" type="text" id="phn" name="phn" placeholder="Enter Phone Number">
+        <br>
+        <button class="btn btn-primary" type="button" onclick="senOTP()">Send OTP</button>
+        <br><br><br>
+        <label class="form-check-label" for="otp">OTP</label><br>
+        <input class="form-control" type="text" id="otp" name="otp" placeholder="Enter OTP">
+        <br>
+        <button class="btn btn-primary" type="button" onclick="getStatus()">Get Status</button>
+        <button class="btn btn-primary" type="button" onclick="showStatus()">Show Status</button>
+        <br>
+        <div>
+            <p id="reqID"></p>
+        </div>
+        <br><br>
+        <div id="status_div">
+            <p id="status"></p>
+        </div>
+    </div>
+
+
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous">
+</script>
+<script>
+
+    function senOTP() {
+
+        var phone_number = document.getElementById("phn").value;
+        if(!phone_number){alert('enter phone number'); return false;}
+        console.log(phone_number);
+
+
+        $.ajax({
+            url:'/openapis/sendOTP',
+            xhrFields:{
+                withCredentials:true
+            },
+            dataType:"json",
+            data: {
+                'phoneNumber':phone_number
+            }
+        }).done(function(data){
+            console.log(data);
+
+        })
+    }
+
+    function getStatus() {
+
+        console.log("METHOD CALLED");
+        var phone_number = document.getElementById("phn").value;
+        if(!phone_number){alert('enter phone number'); return false;}
+        console.log(phone_number);
+
+
+        var settings = {
+            "url": "/openapis/status",
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "data": JSON.stringify({"phoneNumber": phone_number}),
+        };
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+            document.getElementById("reqID").innerHTML = response;
+            document.getElementById("status").innerText = "";
+            pollShowStatus();
+        });
+
+    }
+
+    function pollShowStatus(){
+        console.log("polling started");
+        var i=0;
+        var resp = document.getElementById("status").innerText;
+        console.log(resp);
+        while((resp == null || resp == "") && i < 5){
+            showStatus();
+            console.log(i);
+            i++;
+            wait(5000);
+
+        }
+
+        if(resp == null || resp == ""){
+            document.getElementById("status").innerHTML = "No Data Available";
+        }
+    }
+
+    function wait(ms)
+    {
+        var d = new Date();
+        var d2 = null;
+        do { d2 = new Date(); }
+        while(d2-d < ms);
+    }
+
+    function showStatus() {
+
+        console.log("showStatus METHOD CALLED");
+        var request_id = document.getElementById("reqID").innerText;
+        console.log(request_id);
+        if(!request_id){alert('request_id is not available'); return false;}
+
+
+        $.ajax({
+            url:'/openapis/showCallbackRespInUI',
+            xhrFields:{
+                withCredentials:true
+            },
+            dataType:"json",
+            data: {
+                'requestId':request_id
+            }
+        }).done(function(data){
+            console.log(data);
+            document.getElementById("status").innerHTML = JSON.stringify(data);
+        })
+    }
+</script>
+</body>
+</html>
