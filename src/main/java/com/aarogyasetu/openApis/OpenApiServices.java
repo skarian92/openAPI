@@ -7,6 +7,7 @@ import com.aarogyasetu.pojo.UserStatusResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
@@ -21,6 +22,7 @@ import java.util.Properties;
 @Component
 public class OpenApiServices {
 
+    @Qualifier("getObjectMapper")
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -32,19 +34,23 @@ public class OpenApiServices {
      * @throws IOException
      */
     public String getToken() throws IOException {
-        Properties properties = getProperties();
+        //Properties properties = getProperties();
+        String username = System.getProperty("username");
+        String password = System.getProperty("password");
+        String apiKey = System.getProperty("x-api-key");
+
         String tokenUrl = host + "/token";
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("application/json");
-        String reqBody = String.format("{\n    \"username\": \"%s\",\n    \"password\": \"%s\"\n}",properties.getProperty("username"),properties.getProperty("password"));
+        String reqBody = String.format("{\n    \"username\": \"%s\",\n    \"password\": \"%s\"\n}",username,password);
         RequestBody body = RequestBody.create(mediaType, reqBody);
         Request request = new Request.Builder()
                 .url(tokenUrl)
                 .method("POST", body)
                 .addHeader("accept", "application/json")
-                .addHeader("x-api-key", properties.getProperty("apiKey"))
+                .addHeader("x-api-key", apiKey)
                 .addHeader("Content-Type", "application/json")
                 .build();
         Response response = client.newCall(request).execute();
@@ -62,7 +68,8 @@ public class OpenApiServices {
      * @throws IOException
      */
     public UserStatusResponse getUserStatusRequestId(String token, String phoneNumber) throws IOException {
-        Properties properties = getProperties();
+        //Properties properties = getProperties();
+        String apiKey = System.getProperty("x-api-key");
 
         String userStatusUrl = host + "/userstatus";
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -74,7 +81,7 @@ public class OpenApiServices {
                 .url(userStatusUrl)
                 .method("POST", body)
                 .addHeader("accept", "application/json")
-                .addHeader("x-api-key", properties.getProperty("apiKey"))
+                .addHeader("x-api-key", apiKey)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", token)
                 .build();
@@ -93,7 +100,9 @@ public class OpenApiServices {
      * @throws IOException
      */
     private UserStatusByReqIdResponse getUserStatusByReqId(String token, String requestId) throws IOException {
-        Properties properties = getProperties();
+        //Properties properties = getProperties();
+        String apiKey = System.getProperty("x-api-key");
+
         String userstatusbyreqidUrl = host + "/userstatusbyreqid";
 
         String reqBody = String.format("{\n  \"requestId\": %s \n}", requestId);
@@ -105,7 +114,7 @@ public class OpenApiServices {
         Request request = new Request.Builder()
                 .url(userstatusbyreqidUrl)
                 .method("POST", body)
-                .addHeader("x-api-key", properties.getProperty("apiKey"))
+                .addHeader("x-api-key", apiKey)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", token)
                 .build();
