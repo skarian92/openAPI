@@ -20,11 +20,10 @@
         <button class="btn btn-primary" type="button" onclick="getStatus()">Get Status</button>
         <button class="btn btn-primary" type="button" onclick="showStatus()">Show Status</button>
         <br>
-        <div>
+        <div style="margin: 20px">
             <p id="reqID"></p>
         </div>
-        <br><br>
-        <div id="status_div">
+        <div id="status_div" style="margin: 20px">
             <p id="status"></p>
         </div>
     </div>
@@ -80,6 +79,7 @@
 
         $.ajax(settings).done(function (response) {
             console.log(response);
+            console.log('Hello World');
             document.getElementById("reqID").innerHTML = response;
             document.getElementById("status").innerText = "";
             pollShowStatus();
@@ -87,7 +87,7 @@
 
     }
 
-    function pollShowStatus(){
+    async function pollShowStatus(){
         console.log("polling started");
         var i=0;
         var resp = document.getElementById("status").innerText;
@@ -97,7 +97,7 @@
             console.log(i);
             i++;
             wait(5000);
-
+            resp = document.getElementById("status").innerText;
         }
 
         if(resp == null || resp == ""){
